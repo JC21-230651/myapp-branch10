@@ -33,38 +33,39 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBtJIwQoK9k791_yDAiSglhmLpNgvv09yE',
-    appId: '1:1055692472831:web:f43ad15d9c1b588c8d27ca',
-    messagingSenderId: '1055692472831',
-    projectId: 'myapp-be713',
-    authDomain: 'myapp-be713.firebaseapp.com',
-    storageBucket: 'myapp-be713.firebasestorage.app',
-    measurementId: 'G-GPPMFVP53Z',
+    apiKey: 'AIzaSyCRj0hErjGRzR--ybc8oTY86Db16YTQTCU',
+    appId: '1:300570015281:web:60fbd9b6ea4c8cd84fc710',
+    messagingSenderId: '300570015281',
+    projectId: 'app1-91396',
+    authDomain: 'app1-91396.firebaseapp.com',
+    storageBucket: 'app1-91396.firebasestorage.app',
+    measurementId: 'G-7QK9L66X5F',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDq1y-4IJMniCy3250iL9z-SqXBuNxDrCE',
-    appId: '1:1055692472831:android:236cbbb43bcd664c8d27ca',
-    messagingSenderId: '1055692472831',
-    projectId: 'myapp-be713',
-    storageBucket: 'myapp-be713.firebasestorage.app',
+    apiKey: 'AIzaSyC7Xh7Z1CwkrkqxGGOSwqDx17kKdClN7jw',
+    appId: '1:300570015281:android:1617efdd4f5b4c8c4fc710',
+    messagingSenderId: '300570015281',
+    projectId: 'app1-91396',
+    storageBucket: 'app1-91396.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAryYkRXLudwsEtIsCBD28wo9-jkSQUWTw',
-    appId: '1:1055692472831:ios:02626fdaa3578c1b8d27ca',
-    messagingSenderId: '1055692472831',
-    projectId: 'myapp-be713',
-    storageBucket: 'myapp-be713.firebasestorage.app',
+    apiKey: 'AIzaSyCLNnf41tmwapvD-tHxtiJXrbIDbN3eloU',
+    appId: '1:300570015281:ios:5d1b748fecc9223a4fc710',
+    messagingSenderId: '300570015281',
+    projectId: 'app1-91396',
+    storageBucket: 'app1-91396.firebasestorage.app',
     iosBundleId: 'com.example.myapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAryYkRXLudwsEtIsCBD28wo9-jkSQUWTw',
-    appId: '1:1055692472831:ios:02626fdaa3578c1b8d27ca',
-    messagingSenderId: '1055692472831',
-    projectId: 'myapp-be713',
-    storageBucket: 'myapp-be713.firebasestorage.app',
+    apiKey: 'AIzaSyCLNnf41tmwapvD-tHxtiJXrbIDbN3eloU',
+    appId: '1:300570015281:ios:5d1b748fecc9223a4fc710',
+    messagingSenderId: '300570015281',
+    projectId: 'app1-91396',
+    storageBucket: 'app1-91396.firebasestorage.app',
     iosBundleId: 'com.example.myapp',
   );
+
 }
