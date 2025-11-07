@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'health_state.dart';
 
@@ -50,18 +49,11 @@ class WeeklyReportScreen extends StatelessWidget {
               barGroups: _createBarGroups(data),
               titlesData: FlTitlesData(
                 leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
-                rightTitles: const AxisTitles(),
-                topTitles: const AxisTitles(),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      final day = data[value.toInt()].date;
-                      return SideTitleWidget(
-                        axisSide: meta.axisSide,
-                        child: Text(DateFormat('E', 'ja_JP').format(day)),
-                      );
-                    },
                     reservedSize: 30,
                   ),
                 ),

@@ -19,7 +19,7 @@ class DirectionsService {
     var json = jsonDecode(response.body);
 
     var results = {
-      'polyline_decoded': PolylinePoints().decodePolyline(json['routes'][0]['overview_polyline']['points'])
+      'polyline_decoded': PolylinePoints.decodePolyline(json['routes'][0]['overview_polyline']['points'])
     };
 
     List<LatLng> polylineCoordinates = [];
