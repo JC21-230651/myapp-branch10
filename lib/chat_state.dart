@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 import 'package:myapp/health_state.dart';
 
 class ChatState with ChangeNotifier {
@@ -9,6 +8,10 @@ class ChatState with ChangeNotifier {
   bool _isLoading = false;
 
   final HealthState _healthState;
+
+  // IMPORTANT: Replace with your actual API key and project ID.
+  final String _apiKey = 'YOUR_API_KEY';
+  final String _projectID = 'YOUR_PROJECT_ID';
 
   ChatState(this._healthState);
 
@@ -20,35 +23,35 @@ class ChatState with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    try {
-      final apiKey = dotenv.env['CHAT_GPT_API_KEY'];
-      final healthContext = _createHealthContext();
+    final url = Uri.parse('https://us-central1-aiplatform.googleapis.com/v1/projects/$_projectID/locations/us-central1/publishers/google/models/gemini-1.5-flash:streamGenerateContent');
 
+    final healthContext = _createHealthContext();
+    final fullPrompt = '$healthContext\n\nUser: $text';
+
+    final body = jsonEncode({
+      'contents': [{
+        'parts': [{
+          'text': fullPrompt
+        }]
+      }]
+    });
+
+    try {
       final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/chat/completions'),
+        url,
         headers: {
+          'Authorization': 'Bearer $_apiKey',
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
         },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {
-              'role': 'system',
-              'content':
-                  'You are a helpful assistant. $healthContext'
-            },
-            {'role': 'user', 'content': text},
-          ],
-        }),
+        body: body,
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final content = data['choices'][0]['message']['content'];
-        _addMessage(content, isUser: false);
+        final decodedResponse = jsonDecode(response.body);
+        final generatedText = decodedResponse[0]['candidates'][0]['content']['parts'][0]['text'];
+        _addMessage(generatedText, isUser: false);
       } else {
-        _addMessage('Error: ${response.body}', isUser: false);
+        _addMessage('Sorry, I couldn\'t get a response. ${response.body}', isUser: false);
       }
     } catch (e) {
       _addMessage('Error: $e', isUser: false);
@@ -64,14 +67,16 @@ class ChatState with ChangeNotifier {
     final stepGoal = _healthState.stepGoal;
     final sleepGoal = _healthState.sleepGoal;
     return '''
-Health data context:
+System: You are a helpful and friendly health assistant.
+Here's the user's current health data:
 - Today's steps: ${steps.toStringAsFixed(0)} (Goal: ${stepGoal.toStringAsFixed(0)})
 - Last night's sleep: ${sleepHours.toStringAsFixed(1)} hours (Goal: ${sleepGoal.toStringAsFixed(1)} hours)
+Please respond to the user's message in a supportive and encouraging tone.
 ''';
   }
 
   void _addMessage(String text, {required bool isUser}) {
-    _messages.add(ChatMessage(text: text, isUser: isUser));
+    _messages.insert(0, ChatMessage(text: text, isUser: isUser));
     notifyListeners();
   }
 }

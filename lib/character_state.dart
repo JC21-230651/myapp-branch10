@@ -1,10 +1,8 @@
-
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
 class CharacterState with ChangeNotifier {
   // --- State Properties ---
@@ -12,11 +10,11 @@ class CharacterState with ChangeNotifier {
   String _characterPrompt = '';
   Uint8List? _currentImage;
   List<Uint8List> _imageHistory = [];
-  String? _backgroundImagePath; // For user-selectable background
+  String? _backgroundImagePath;
   bool _isGenerating = false;
   String? _error;
 
-  // --- Getters for UI binding ---
+  // --- Getters ---
   String get characterName => _characterName;
   String get characterPrompt => _characterPrompt;
   Uint8List? get currentImage => _currentImage;
@@ -25,12 +23,17 @@ class CharacterState with ChangeNotifier {
   bool get isGenerating => _isGenerating;
   String? get error => _error;
 
-  // --- Constructor ---
+  // --- API Configuration ---
+  // IMPORTANT: Replace with your actual API key and project ID.
+  final String _apiKey = 'YOUR_API_KEY';
+  final String _projectID = 'YOUR_PROJECT_ID';
+
+
   CharacterState() {
     loadState();
   }
 
-  // --- Public Methods for UI Interaction ---
+  // --- Public Methods ---
 
   void setCharacterName(String name) {
     if (name != _characterName) {
@@ -42,6 +45,9 @@ class CharacterState with ChangeNotifier {
 
   void setCurrentImage(Uint8List imageBytes) {
     _currentImage = imageBytes;
+    if (!_imageHistory.contains(imageBytes)) {
+      _imageHistory.insert(0, imageBytes);
+    }
     _saveState();
     notifyListeners();
   }
@@ -54,52 +60,50 @@ class CharacterState with ChangeNotifier {
 
   Future<void> generateImage(String prompt) async {
     if (prompt.trim().isEmpty) {
-      throw Exception('Prompt cannot be empty.');
+      _error = 'Prompt cannot be empty.';
+      notifyListeners();
+      return;
     }
     _isGenerating = true;
     _error = null;
     _characterPrompt = prompt;
     notifyListeners();
 
-    try {
-      final apiKey = dotenv.env['CHAT_GPT_API_KEY'];
-      if (apiKey == null) {
-        throw Exception('CHAT_GPT_API_KEY not found in .env file.');
-      }
+    final url = Uri.parse('https://us-central1-aiplatform.googleapis.com/v1/projects/$_projectID/locations/us-central1/publishers/google/models/imagegeneration:predict');
 
+    final body = jsonEncode({
+      'instances': [
+        {'prompt': prompt}
+      ],
+      'parameters': {
+        'sampleCount': 1
+      }
+    });
+
+    try {
       final response = await http.post(
-        Uri.parse('https://api.openai.com/v1/images/generations'),
+        url,
         headers: {
+          'Authorization': 'Bearer $_apiKey',
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
         },
-        body: jsonEncode({
-          'prompt': prompt,
-          'n': 1,
-          'size': '512x512',
-          'response_format': 'url',
-        }),
+        body: body,
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final imageUrl = data['data'][0]['url'];
-        final imageResponse = await http.get(Uri.parse(imageUrl));
-        if (imageResponse.statusCode == 200) {
-          final newImage = imageResponse.bodyBytes;
-          _currentImage = newImage;
-          _imageHistory.insert(0, newImage);
-        } else {
-          throw Exception('Failed to download image from URL.');
-        }
+        final decodedResponse = jsonDecode(response.body);
+        final imageBytesString = decodedResponse['predictions'][0]['bytesBase64Encoded'];
+        final newImage = base64Decode(imageBytesString);
+        
+        _currentImage = newImage;
+        _imageHistory.insert(0, newImage);
+
       } else {
-        final errorBody = jsonDecode(response.body);
-        final errorMessage = errorBody['error']?['message'] ?? 'Unknown error from API';
-        throw Exception('Failed to generate image: $errorMessage');
+        throw Exception('Image generation failed: ${response.body}');
       }
     } catch (e) {
-      _error = e.toString();
-      rethrow;
+      _error = 'Error generating image: $e';
+      rethrow; // Or handle it more gracefully
     } finally {
       _isGenerating = false;
       await _saveState();
@@ -115,11 +119,7 @@ class CharacterState with ChangeNotifier {
     _backgroundImagePath = null;
     
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('char_name');
-    await prefs.remove('char_prompt');
-    await prefs.remove('char_current_image');
-    await prefs.remove('char_image_history');
-    await prefs.remove('char_background_image'); // Also remove background
+    await prefs.clear(); // A more thorough way to reset
     
     notifyListeners();
   }

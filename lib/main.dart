@@ -1,4 +1,3 @@
-
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +8,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:health/health.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:myapp/firebase_options.dart';
 import 'package:myapp/routes/app_router.dart';
 import 'package:myapp/health_state.dart';
@@ -21,12 +20,22 @@ import 'package:myapp/medication_state.dart';
 import 'package:myapp/character_state.dart';
 import 'package:myapp/services/notification_service.dart'; // Import the service
 
+// IMPORTANT: Replace with your actual API key and project ID.
+final String _apiKey = 'YOUR_API_KEY';
+final String _projectID = 'YOUR_PROJECT_ID';
+
 // Top-level function for background tasks - NOT for web
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     if (task == 'weeklyReport') {
       developer.log('Executing weekly report task', name: 'my_app.background');
+
+      // Essential initializations for background task
+      WidgetsFlutterBinding.ensureInitialized(); // Needed for some plugins
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
 
       final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
           FlutterLocalNotificationsPlugin();
@@ -37,15 +46,9 @@ void callbackDispatcher() {
       await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
       try {
-        // Initialize dependencies for background task
-        await dotenv.load(fileName: ".env");
-        await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-
         final healthData = await _getWeeklyHealthData();
         if (healthData.isNotEmpty) {
-          final summary = await _generateWeeklySummaryWithChatGPT(healthData);
+          final summary = await _generateWeeklySummaryWithGemini(healthData);
           await _showNotification(flutterLocalNotificationsPlugin, summary);
           developer.log('Weekly report generated and notification shown.', name: 'my_app.background');
         } else {
@@ -82,7 +85,7 @@ Future<List<HealthDataPoint>> _getWeeklyHealthData() async {
       developer.log("Error fetching health data: $e", name: 'my_app.background');
     }
   }
-  // Filter out duplicates. Health package sometimes returns duplicates.
+  // Filter out duplicates.
   final uniqueData = <String, HealthDataPoint>{};
   for (final dataPoint in healthData) {
     final key = '${dataPoint.typeString}-${dataPoint.dateFrom.toIso8601String()}';
@@ -91,8 +94,8 @@ Future<List<HealthDataPoint>> _getWeeklyHealthData() async {
   return uniqueData.values.toList();
 }
 
-Future<String> _generateWeeklySummaryWithChatGPT(List<HealthDataPoint> data) async {
-  final openAI = OpenAI.instance.build(token: dotenv.env['CHATGPT_API_KEY']);
+Future<String> _generateWeeklySummaryWithGemini(List<HealthDataPoint> data) async {
+  final url = Uri.parse('https://us-central1-aiplatform.googleapis.com/v1/projects/$_projectID/locations/us-central1/publishers/google/models/gemini-1.5-flash:streamGenerateContent');
 
   final prompt = '''
 以下の直近1週間の健康データ（歩数、消費カロリー、睡眠時間、体重）を分析し、ユーザー向けの簡潔な要約と具体的なアドバイスを生成してください。
@@ -102,22 +105,36 @@ Future<String> _generateWeeklySummaryWithChatGPT(List<HealthDataPoint> data) asy
 ${data.map((d) => '${d.typeString}: ${d.value} at ${DateFormat('MM/dd HH:mm').format(d.dateFrom)}').join('\n')}
 
 生成例:
-「今週もお疲れ様！あなたの頑張り、ちゃんとデータに表れているよ。特に睡眠時間が安定していて素晴らしいね！来週は、もう少しだけ歩数を増やしてみると、さらに体が軽くなるかも。週末に近所を散歩してみるのはどうかな？無理せず、自分のペースでいこうね！」
+「今週もお疲れ様！あなたの頑張り、ちゃんとデータに表れているよ。特に睡眠時間が安定していて素晴らしいね！来週は、もう少しだけ歩数を増やしてみると、さらに体が軽くなるかも。週末に近所を散歩してみるのはどうかな？無理せず、自分のペースでいしようね！」
 ''';
 
-  final request = ChatCompleteText(
-    messages: [
-      {"role": "user", "content": prompt}
-    ],
-    maxToken: 500,
-    model: GptTurboChatModel(),
-  );
+  final body = jsonEncode({
+      'contents': [{
+        'parts': [{
+          'text': prompt
+        }]
+      }]
+    });
 
   try {
-    final response = await openAI.onChatCompletion(request: request);
-    return response?.choices.first.message?.content.trim() ?? '週次レポートの生成に失敗しました。';
+    final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_apiKey',
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+
+    if (response.statusCode == 200) {
+        final decodedResponse = jsonDecode(response.body);
+        final generatedText = decodedResponse[0]['candidates'][0]['content']['parts'][0]['text'];
+        return generatedText;
+      } else {
+        return '週次レポートの生成に失敗しました。 ${response.body}';
+      }
   } catch (e) {
-    developer.log('Error generating summary with ChatGPT', name: 'my_app.background', error: e);
+    developer.log('Error generating summary with Gemini', name: 'my_app.background', error: e);
     return 'AIによる分析中にエラーが発生しました。';
   }
 }
@@ -143,7 +160,6 @@ Future<void> _showNotification(FlutterLocalNotificationsPlugin plugin, String me
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ja_JP');
-  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -166,9 +182,8 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   final themeState = ThemeState(prefs);
-  // Pass the real NotificationService to MedicationState
-  final medicationState = MedicationState(notificationService: NotificationService()); 
-  await medicationState.init(); // Explicitly initialize MedicationState
+  final medicationState = MedicationState(notificationService: NotificationService());
+  await medicationState.init();
   final characterState = CharacterState();
 
   final healthState = HealthState();

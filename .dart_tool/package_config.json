@@ -38,12 +38,6 @@
       "languageVersion": "3.4"
     },
     {
-      "name": "chat_gpt_sdk",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/chat_gpt_sdk-3.1.5",
-      "packageUri": "lib/",
-      "languageVersion": "3.5"
-    },
-    {
       "name": "clock",
       "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/clock-1.1.2",
       "packageUri": "lib/",
@@ -63,7 +57,7 @@
     },
     {
       "name": "crypto",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/crypto-3.0.6",
+      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/crypto-3.0.7",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -104,24 +98,6 @@
       "languageVersion": "3.7"
     },
     {
-      "name": "dio",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/dio-5.9.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.18"
-    },
-    {
-      "name": "dio_compatibility_layer",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/dio_compatibility_layer-0.1.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.0"
-    },
-    {
-      "name": "dio_web_adapter",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/dio_web_adapter-2.1.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.3"
-    },
-    {
       "name": "equatable",
       "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/equatable-2.0.7",
       "packageUri": "lib/",
@@ -132,18 +108,6 @@
       "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/fake_async-1.3.3",
       "packageUri": "lib/",
       "languageVersion": "3.3"
-    },
-    {
-      "name": "fetch_api",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/fetch_api-2.3.1",
-      "packageUri": "lib/",
-      "languageVersion": "3.6"
-    },
-    {
-      "name": "fetch_client",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/fetch_client-1.2.0",
-      "packageUri": "lib/",
-      "languageVersion": "3.4"
     },
     {
       "name": "ffi",
@@ -228,12 +192,6 @@
       "rootUri": "file:///nix/store/d6iak8469933f517c9ybb9zbsrbimi1g-flutter-wrapped-3.35.5-sdk-links/packages/flutter",
       "packageUri": "lib/",
       "languageVersion": "3.8"
-    },
-    {
-      "name": "flutter_dotenv",
-      "rootUri": "file:///home/user/.pub-cache/hosted/pub.dev/flutter_dotenv-6.0.0",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
     },
     {
       "name": "flutter_lints",
