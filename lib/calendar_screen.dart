@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:myapp/medication_state.dart';
 import 'package:myapp/models/medication.dart';
+import 'package:myapp/medication_form.dart';
 
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
@@ -84,6 +85,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('カレンダー'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.today),
+            tooltip: '今日に戻る',
+            onPressed: () {
+              setState(() {
+                _focusedDay = DateTime.now();
+                _selectedDay = _focusedDay;
+              });
+              _selectedEvents.value =
+                  context.read<MedicationState>().getEventsForDay(_selectedDay!);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView( // Wrap with SingleChildScrollView to prevent overflow
         child: Column(
@@ -144,6 +159,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) => const MedicationForm(),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
