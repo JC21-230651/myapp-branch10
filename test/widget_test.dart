@@ -11,6 +11,7 @@ import 'package:myapp/services/notification_service.dart';
 import 'package:myapp/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:myapp/task_state.dart';
 
 // Mock implementation of INotificationService for testing.
 class MockNotificationService implements INotificationService {
@@ -45,6 +46,8 @@ class MockHealthState extends HealthState {
   }
 }
 
+class MockTaskState extends TaskState {}
+
 void main() {
   // Required for all widget tests.
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -65,6 +68,7 @@ void main() {
     final characterState = CharacterState();
     final healthState = MockHealthState(); // Use the correct mock.
     final chatState = ChatState(healthState);
+    final taskState = MockTaskState();
 
     // Act: Build the main application widget.
     await tester.pumpWidget(MyApp(
@@ -73,6 +77,7 @@ void main() {
       chatState: chatState,
       medicationState: medicationState,
       characterState: characterState,
+      taskState: taskState,
     ));
 
     // Wait for all animations and async operations to complete.

@@ -18,7 +18,8 @@ import 'package:myapp/theme.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:myapp/medication_state.dart';
 import 'package:myapp/character_state.dart';
-import 'package:myapp/services/notification_service.dart'; // Import the service
+import 'package:myapp/services/notification_service.dart';
+import 'package:myapp/task_state.dart'; // Import TaskState
 
 // IMPORTANT: Replace with your actual API key and project ID.
 final String _apiKey = 'YOUR_API_KEY';
@@ -190,6 +191,7 @@ void main() async {
   await healthState.checkPermissionsAndFetchData();
 
   final chatState = ChatState(healthState);
+  final taskState = TaskState(); // Create TaskState
 
   runApp(MyApp(
     themeState: themeState,
@@ -197,6 +199,7 @@ void main() async {
     chatState: chatState,
     medicationState: medicationState,
     characterState: characterState,
+    taskState: taskState, // Pass TaskState
   ));
 }
 
@@ -206,6 +209,7 @@ class MyApp extends StatelessWidget {
   final ChatState chatState;
   final MedicationState medicationState;
   final CharacterState characterState;
+  final TaskState taskState; // Add TaskState
 
   const MyApp({
     super.key,
@@ -214,6 +218,7 @@ class MyApp extends StatelessWidget {
     required this.chatState,
     required this.medicationState,
     required this.characterState,
+    required this.taskState, // Add TaskState
   });
 
   @override
@@ -226,6 +231,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: chatState),
         ChangeNotifierProvider.value(value: medicationState),
         ChangeNotifierProvider.value(value: characterState),
+        ChangeNotifierProvider.value(value: taskState), // Provide TaskState
       ],
       child: Consumer<ThemeState>(
         builder: (context, theme, child) {
