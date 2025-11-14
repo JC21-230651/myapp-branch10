@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:myapp/models/task.dart';
 import 'package:myapp/task_state.dart';
+import 'package:myapp/schedule_screen.dart';
 
 class TaskAddScreen extends StatefulWidget {
   const TaskAddScreen({super.key});
@@ -114,6 +115,16 @@ class _TaskAddScreenState extends State<TaskAddScreen> {
               ElevatedButton(
                 onPressed: _submitForm,
                 child: const Text('追加'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ScheduleScreen()),
+                  );
+                },
+                child: const Text('今後2週間のスケジュールを生成'),
               ),
             ],
           ),
