@@ -4,6 +4,7 @@ class Task {
   final String description;
   final DateTime dueDate;
   bool isCompleted;
+  final int priority;
 
   Task({
     required this.id,
@@ -11,5 +12,6 @@ class Task {
     this.description = '',
     required this.dueDate,
     this.isCompleted = false,
+    this.priority = 1,
   });
 }

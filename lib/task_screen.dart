@@ -20,7 +20,7 @@ class TaskScreen extends StatelessWidget {
           final task = taskState.tasks[index];
           return ListTile(
             title: Text(
-              task.title,
+              '${task.title} (Priority: ${task.priority})',
               style: TextStyle(
                 decoration: task.isCompleted
                     ? TextDecoration.lineThrough

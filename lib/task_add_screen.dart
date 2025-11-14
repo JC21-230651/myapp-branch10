@@ -16,6 +16,7 @@ class _TaskAddScreenState extends State<TaskAddScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  int _selectedPriority = 2;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -38,6 +39,7 @@ class _TaskAddScreenState extends State<TaskAddScreen> {
         title: _titleController.text,
         description: _descriptionController.text,
         dueDate: _selectedDate,
+        priority: _selectedPriority,
       );
       Provider.of<TaskState>(context, listen: false).addTask(newTask);
       Navigator.pop(context);
@@ -86,6 +88,26 @@ class _TaskAddScreenState extends State<TaskAddScreen> {
                     onPressed: () => _selectDate(context),
                     child: const Text('日付を選択'),
                   ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Text('優先度:'),
+                  const SizedBox(width: 16),
+                  ...[1, 2, 3].map((priority) {
+                    return ChoiceChip(
+                      label: Text('$priority'),
+                      selected: _selectedPriority == priority,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() {
+                            _selectedPriority = priority;
+                          });
+                        }
+                      },
+                    );
+                  }).expand((widget) => [widget, const SizedBox(width: 8)]),
                 ],
               ),
               const SizedBox(height: 16),
